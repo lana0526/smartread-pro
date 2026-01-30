@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  clerkId       String?   @unique // Clerk 用户ID
+  
+  subscriptionId String?
+  subscriptionStatus String? // active, canceled, past_due
+  subscriptionPlan String?   // free, pro, premium
+  subscriptionEndsAt DateTime?
+  
+  articles      Article[]
+  vocabularies  Vocabulary[]
+  notes         Note[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String
+  content     String   @db.Text
+  summary     String?  @db.Text
+  difficulty  String?
+  wordCount   Int?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  vocabularies Vocabulary[]
+  notes       Note[]
+}
+
+model Vocabulary {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId   String?
+  article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  
+  word        String
+  definition  String   @db.Text
+  context     String?  @db.Text
+  learned     Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId   String?
+  article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  
+  content     String   @db.Text
+  position    String?  // 文章中的位置
+  highlight   String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  
+  stripePaymentId String   @unique
+  amount          Int      // 金额（分）
+  currency        String   @default("usd")
+  status          String   // succeeded, pending, failed
+  
+  plan            String   // pro, premium
+  
+  createdAt       DateTime @default(now())
+}

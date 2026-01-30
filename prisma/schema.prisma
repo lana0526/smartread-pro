@@ -1,0 +1,117 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 配额管理
+  subscriptionTier String   @default("free")      // free, pro, premium
+  trialUsed        Int      @default(0)           // 已使用的试用次数
+  trialLimit       Int      @default(10)          // 免费用户限额
+  isPaid           Boolean  @default(false)       // 是否付费用户
+  subscriptionEnd  DateTime?                      // 订阅到期时间
+
+  // 关联数据
+  articles      Article[]
+  vocabularies  Vocabulary[]
+  notes         Note[]
+  payments      Payment[]
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  content     String   @db.Text
+  difficulty  String?
+  analysis    Json?
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabularies Vocabulary[]
+  notes        Note[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Vocabulary {
+  id              String   @id @default(cuid())
+  userId          String
+  articleId       String?
+  word            String
+  pinyin          String?
+  definition      String   @db.Text
+  partOfSpeech    String?
+  difficulty      Int      @default(1)
+  exampleSentence String?  @db.Text
+  contextHint     String?  @db.Text
+  context         String?  @db.Text
+  
+  // 间隔重复算法参数
+  easeFactor      Float    @default(2.5)
+  interval        Int      @default(1)
+  repetitions     Int      @default(0)
+  nextReviewDate  DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([articleId])
+  @@index([nextReviewDate])
+}
+
+model Note {
+  id           String   @id @default(cuid())
+  userId       String
+  articleId    String?
+  selectedText String   @db.Text
+  analysis     String   @db.Text
+  tags         String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([articleId])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  stripeSessionId String   @unique
+  amount          Int
+  currency        String   @default("usd")
+  status          String
+  plan            String
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripeSessionId])
+}
