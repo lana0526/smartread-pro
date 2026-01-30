@@ -20,7 +20,6 @@ export async function handleReferralSignup(
         name,
         trialUsed: 0,
         trialLimit: 10,
-        referralBonus: 0,
         subscriptionTier: 'free',
         isPaid: false,
       },
