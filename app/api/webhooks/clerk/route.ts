@@ -1,7 +1,6 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
-import { handleReferralSignup } from '@/lib/referral'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
@@ -43,10 +42,20 @@ export async function POST(req: Request) {
     const { id, email_addresses, first_name, last_name, unsafe_metadata } = evt.data
     const email = email_addresses[0].email_address
     const name = `${first_name || ''} ${last_name || ''}`.trim() || undefined
-    const referralCode = unsafe_metadata?.referralCode as string | undefined
-
-    // 创建用户（带推荐处理）
-    await handleReferralSignup(id, email, name, referralCode)
+    // 创建或更新用户（不处理推荐）
+    await prisma.user.upsert({
+      where: { clerkId: id },
+      update: { email, name },
+      create: {
+        clerkId: id,
+        email,
+        name,
+        trialUsed: 0,
+        trialLimit: 10,
+        subscriptionTier: 'free',
+        isPaid: false,
+      },
+    })
   }
 
   if (eventType === 'user.updated') {
