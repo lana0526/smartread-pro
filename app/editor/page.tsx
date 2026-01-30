@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
 import { AppStep, Article, Vocabulary, Note, VideoScript } from '@/types';
 import Editor from '@/components/Editor';
 import Reader from '@/components/Reader';
@@ -11,7 +10,6 @@ import IntroVideo from '@/components/IntroVideo';
 import VocabLearning from '@/components/VocabLearning';
 
 export default function EditorPage() {
-  const { user } = useUser();
   const [step, setStep] = useState<AppStep>(AppStep.EDITOR);
   const [article, setArticle] = useState<Article | null>(null);
   const [vocabList, setVocabList] = useState<Vocabulary[]>([]);

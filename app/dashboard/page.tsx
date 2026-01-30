@@ -1,11 +1,8 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs'
-import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
 
 export default function DashboardPage() {
-  const { user } = useUser()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
@@ -16,7 +13,6 @@ export default function DashboardPage() {
             智读·精练
           </Link>
           <div className="flex items-center gap-4">
-            <UserButton afterSignOutUrl="/" />
           </div>
         </div>
       </nav>
