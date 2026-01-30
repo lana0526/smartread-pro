@@ -22,7 +22,7 @@ export default function DashboardPage() {
         {/* 欢迎区域 */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            欢迎回来，{user?.firstName || user?.username || '用户'}！
+          ?????
           </h1>
           <p className="text-gray-600">
             继续您的学习之旅
