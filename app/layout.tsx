@@ -5,8 +5,11 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: '????? - AI ?????????',
-  description: '?? AI ?????????????',
+  title: 'WritingBuddy ? AI Reading & Writing Companion',
+  description: 'An AI-powered reading and writing assistant for students',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
